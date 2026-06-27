@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReleaseBox Store</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* 亮色主题变量 */
+            --bg-color: #f5f5f7;
+            --surface-color: rgba(255, 255, 255, 0.8);
+            --text-color: #1d1d1f;
+            --text-secondary: #86868b;
+            --accent-color: #007aff;
+            --accent-light: rgba(0, 122, 255, 0.1);
+            --border-color: rgba(0, 0, 0, 0.1);
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            --glass-blur: 10px;
+            --glass-saturation: 180%;
+            --card-radius: 20px;
+            --nav-height: 60px;
+        }
+
+        /* 暗色主题变量 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #000000;
+                --surface-color: rgba(28, 28, 30, 0.8);
+                --text-color: #f5f5f7;
+                --text-secondary: #8e8e93;
+                --accent-color: #0a84ff;
+                --accent-light: rgba(10, 132, 255, 0.2);
+                --border-color: rgba(255, 255, 255, 0.1);
+                --shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        /* 手动主题切换类 - 由JS控制 */
+        .theme-light {
+            --bg-color: #f5f5f7;
+            --surface-color: rgba(255, 255, 255, 0.8);
+            --text-color: #1d1d1f;
+            --text-secondary: #86868b;
+            --accent-color: #007aff;
+            --accent-light: rgba(0, 122, 255, 0.1);
+            --border-color: rgba(0, 0, 0, 0.1);
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .theme-dark {
+            --bg-color: #000000;
+            --surface-color: rgba(28, 28, 30, 0.8);
+            --text-color: #f5f5f7;
+            --text-secondary: #8e8e93;
+            --accent-color: #0a84ff;
+            --accent-light: rgba(10, 132, 255, 0.2);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            font-family: -LGOS-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+            padding-left: 280px; /* 为左侧导航栏留出空间 */
+            transition: padding-left 0.3s ease;
+        }
+
+        /* 液态玻璃效果基础类 */
+        .glass {
+            background: var(--surface-color);
+            backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+            -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+
+        /* 左侧导航栏 - 桌面样式 */
+        .side-nav {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 40px;
+            padding-left: 10px;
+        }
+
+        .logo i {
+            color: var(--accent-color);
+            margin-right: 10px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            margin-bottom: 5px;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-link:hover {
+            background-color: var(--accent-light);
+            color: var(--accent-color);
+        }
+
+        .nav-link.active {
+            background-color: var(--accent-light);
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .nav-link i {
+            font-size: 20px;
+            width: 24px;
+            margin-right: 12px;
+            text-align: center;
+        }
+
+        .nav-text {
+            flex-grow: 1;
+        }
+
+        .nav-badge {
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        /* 底部导航栏 - 移动端样式 */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: auto;
+            padding: 12px 20px;
+            border-radius: 24px;
+            z-index: 100;
+        }
+
+        .bottom-nav-menu {
+            display: flex;
+            list-style: none;
+        }
+
+        .bottom-nav-item {
+            margin: 0 8px;
+        }
+
+        .bottom-nav-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            min-width: 70px;
+        }
+
+        .bottom-nav-link:hover,
+        .bottom-nav-link.active {
+            background-color: var(--accent-light);
+            color: var(--accent-color);
+        }
+
+        .bottom-nav-link i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .bottom-nav-text {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            flex-grow: 1;
+            padding: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 设置面板 */
+        .settings-panel {
+            position: fixed;
+            right: 30px;
+            top: 30px;
+            width: 300px;
+            padding: 25px;
+            border-radius: var(--card-radius);
+            z-index: 90;
+        }
+
+        .settings-title {
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .settings-title i {
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+
+        .setting-item {
+            margin-bottom: 20px;
+        }
+
+        .setting-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .slider-value {
+            margin-left: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            min-width: 40px;
+            text-align: right;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            background: linear-gradient(to right, var(--accent-color), var(--accent-color)) no-repeat;
+            background-color: var(--border-color);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+            border: 3px solid var(--surface-color);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+            border: 3px solid var(--surface-color);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .theme-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .theme-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--surface-color);
+            color: var(--text-color);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .theme-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .theme-btn:hover:not(.active) {
+            background-color: var(--accent-light);
+        }
+
+        /* 我的页面内容 */
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--accent-color), #5856d6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+        }
+
+        .profile-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .see-all {
+            font-size: 16px;
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .see-all:hover {
+            text-decoration: underline;
+        }
+
+        /* 用户信息卡片 */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            padding: 30px;
+            border-radius: var(--card-radius);
+            margin-bottom: 40px;
+        }
+
+        .user-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 25px;
+            border: 3px solid var(--border-color);
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .user-email {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+
+        .user-stats {
+            display: flex;
+            gap: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .login-btn {
+            padding: 10px 25px;
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .login-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        /* 未登录状态样式 */
+        .not-logged-in {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .login-prompt {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        /* 功能网格 */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .feature-card {
+            border-radius: var(--card-radius);
+            padding: 25px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+        }
+
+        .feature-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .feature-description {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .feature-action {
+            font-size: 14px;
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+
+        .feature-action i {
+            margin-left: 5px;
+            transition: transform 0.2s ease;
+        }
+
+        .feature-action:hover i {
+            transform: translateX(5px);
+        }
+
+        /* 应用卡片 */
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 25px;
+        }
+
+        .app-card {
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s ease;
+        }
+
+        .app-card:hover {
+            transform: translateY(-8px);
+        }
+
+        .app-icon {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .app-info {
+            padding: 20px;
+        }
+
+        .app-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .app-category {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .app-description {
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text-color);
+            opacity: 0.9;
+            margin-bottom: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .app-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-rating {
+            display: flex;
+            align-items: center;
+            color: #f5b642;
+        }
+
+        .app-rating span {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-left: 5px;
+        }
+
+        .get-btn {
+            padding: 8px 20px;
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .get-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        /* 设置项列表 */
+        .settings-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+
+        .settings-item {
+            display: flex;
+            align-items: center;
+            padding: 20px 25px;
+            border-radius: 15px;
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .settings-item:hover {
+            background-color: var(--accent-light);
+        }
+
+        .settings-icon {
+            font-size: 20px;
+            color: var(--accent-color);
+            margin-right: 20px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .settings-text {
+            flex: 1;
+        }
+
+        .settings-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .settings-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .settings-arrow {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        /* 购买历史 */
+        .purchase-history {
+            margin-bottom: 40px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .history-app-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            margin-right: 20px;
+            object-fit: cover;
+        }
+
+        .history-app-info {
+            flex: 1;
+        }
+
+        .history-app-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .history-purchase-date {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .history-price {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1100px) {
+            .container {
+                padding-left: 0;
+                padding-bottom: 100px; /* 为底部导航栏留出空间 */
+            }
+
+            .side-nav {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .side-nav.active {
+                transform: translateX(0);
+            }
+
+            .bottom-nav {
+                display: block;
+            }
+
+            .settings-panel {
+                position: relative;
+                right: auto;
+                top: auto;
+                width: 100%;
+                margin-bottom: 30px;
+            }
+
+            .user-profile {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .user-avatar {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px 15px;
+            }
+
+            .page-title {
+                font-size: 28px;
+            }
+
+            .page-subtitle {
+                font-size: 16px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .apps-grid {
+                grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .apps-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bottom-nav {
+                width: calc(100% - 40px);
+            }
+
+            .bottom-nav-link {
+                min-width: auto;
+                padding: 8px 12px;
+            }
+
+            .history-item {
+                flex-wrap: wrap;
+            }
+
+            .history-app-icon {
+                width: 50px;
+                height: 50px;
+                margin-right: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 左侧导航栏 (桌面端) -->
+    <nav class="side-nav glass">
+        <div class="logo">
+            <i class="fa-brands fa-app-store"></i>
+            <span>ReleaseBox Store</span>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="appstore_homepage.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span class="nav-text">首页</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="appstore_discover.html" class="nav-link">
+                    <i class="fas fa-compass"></i>
+                    <span class="nav-text">发现</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="appstore_myprofile.html" class="nav-link active">
+                    <i class="fas fa-user"></i>
+                    <span class="nav-text">我的</span>
+                    <span class="nav-badge">登录</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- 底部导航栏 (移动端) -->
+    <nav class="bottom-nav glass">
+        <ul class="bottom-nav-menu">
+            <li class="bottom-nav-item">
+                <a href="appstore_homepage.html" class="bottom-nav-link">
+                    <i class="fas fa-home"></i>
+                    <span class="bottom-nav-text">首页</span>
+                </a>
+            </li>
+            <li class="bottom-nav-item">
+                <a href="appstore_discover.html" class="bottom-nav-link">
+                    <i class="fas fa-compass"></i>
+                    <span class="bottom-nav-text">发现</span>
+                </a>
+            </li>
+            <li class="bottom-nav-item">
+                <a href="appstore_myprofile.html" class="bottom-nav-link active">
+                    <i class="fas fa-user"></i>
+                    <span class="bottom-nav-text">我的</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <main class="main-content">
+            <!-- 设置面板 -->
+            <div class="settings-panel glass">
+                <h3 class="settings-title">
+                    <i class="fas fa-sliders-h"></i> 效果设置
+                </h3>
+                
+                <div class="setting-item">
+                    <label class="setting-label">液态玻璃强度</label>
+                    <div class="slider-container">
+                        <input type="range" id="glassStrength" min="0" max="20" value="10" step="1">
+                        <span class="slider-value" id="glassValue">10</span>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <label class="setting-label">主题模式</label>
+                    <div class="theme-buttons">
+                        <button class="theme-btn active" id="themeAuto">自动</button>
+                        <button class="theme-btn" id="themeLight">浅色</button>
+                        <button class="theme-btn" id="themeDark">深色</button>
+                    </div>
+                </div>
+                
+                <div class="setting-item">
+                    <p style="font-size: 13px; color: var(--text-secondary); margin-top: 10px;">
+                        <i class="fas fa-info-circle"></i> 液态玻璃效果较为挑战计算机性能，建议不要乱动，保持默认值即可。
+                    </p>
+                </div>
+            </div>
+
+            <!-- 我的页面内容 -->
+            <div class="page-header">
+                <h1 class="page-title">我的账户</h1>
+                <p class="page-subtitle">登录以管理您的应用、设置和个人信息</p>
+            </div>
+
+            <!-- 用户信息卡片 - 未登录状态 -->
+            <div class="user-profile glass not-logged-in">
+                <img src="user.png" alt="默认头像" class="user-avatar">
+                <div class="user-info">
+                    <h2 class="user-name">未登录</h2>
+                    <p class="login-prompt">登录以查看个人信息、已购应用和收藏内容</p>
+                    <a href="login.html" class="login-btn">登录</a>
+                </div>
+            </div>
+
+            <!-- 功能网格 -->
+            <div class="profile-section">
+                <h2 class="section-title">常用功能</h2>
+                <div class="features-grid">
+                    <div class="feature-card glass" data-feature="purchased">
+                        <i class="fas fa-shopping-bag feature-icon"></i>
+                        <h3 class="feature-title">已购项目</h3>
+                        <p class="feature-description">登录后查看和管理您已购买的所有应用、游戏和订阅。可以重新下载或查看购买历史。</p>
+                        <a href="login.html" class="feature-action">登录后查看 <i class="fas fa-chevron-right"></i></a>
+                    </div>
+                    <div class="feature-card glass" data-feature="wishlist">
+                        <i class="fas fa-heart feature-icon"></i>
+                        <h3 class="feature-title">愿望清单</h3>
+                        <p class="feature-description">登录后保存您感兴趣的应用和游戏，在有折扣或更新时获得通知。</p>
+                        <a href="login.html" class="feature-action">登录后管理 <i class="fas fa-chevron-right"></i></a>
+                    </div>
+                    <div class="feature-card glass" data-feature="family">
+                        <i class="fas fa-users feature-icon"></i>
+                        <h3 class="feature-title">家人共享</h3>
+                        <p class="feature-description">登录后与家庭成员共享购买项目，最多可与5位家庭成员共享应用、音乐等。</p>
+                        <a href="login.html" class="feature-action">登录后设置 <i class="fas fa-chevron-right"></i></a>
+                    </div>
+                    <div class="feature-card glass" data-feature="subscriptions">
+                        <i class="fas fa-sync feature-icon"></i>
+                        <h3 class="feature-title">订阅管理</h3>
+                        <p class="feature-description">登录后管理您的应用订阅，查看到期时间、更改计划或取消订阅。</p>
+                        <a href="login.html" class="feature-action">登录后管理 <i class="fas fa-chevron-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 最近购买 -->
+            <div class="profile-section purchase-history">
+                <h2 class="section-title">
+                    最近购买
+                    <a href="login.html" class="see-all">登录后查看 <i class="fas fa-chevron-right"></i></a>
+                </h2>
+                <div class="history-list">
+                    <div class="history-item glass">
+                        <div class="login-required-message" style="text-align: center; width: 100%; padding: 20px; color: var(--text-secondary);">
+                            <i class="fas fa-lock" style="font-size: 24px; margin-bottom: 10px; display: block;"></i>
+                            <p>请登录以查看购买记录</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 收藏应用 -->
+            <div class="profile-section">
+                <h2 class="section-title">
+                    我的收藏
+                    <a href="login.html" class="see-all">登录后查看 <i class="fas fa-chevron-right"></i></a>
+                </h2>
+                <div class="apps-grid">
+                    <div class="app-card glass" style="opacity: 0.7;">
+                        <div style="background: linear-gradient(135deg, var(--accent-light), var(--border-color)); height: 160px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-lock" style="font-size: 48px; color: var(--text-secondary);"></i>
+                        </div>
+                        <div class="app-info">
+                            <h3 class="app-name">登录后查看</h3>
+                            <p class="app-category">请先登录账户</p>
+                            <p class="app-description">登录后可以查看您收藏的应用和游戏，获取个性化推荐。</p>
+                            <div class="app-footer">
+                                <div class="app-rating">
+                                    <i class="far fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                    <span>--</span>
+                                </div>
+                                <a href="login.html" class="get-btn" id="loginBtn2">登录</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="app-card glass" style="opacity: 0.7;">
+                        <div style="background: linear-gradient(135deg, var(--accent-light), var(--border-color)); height: 160px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-lock" style="font-size: 48px; color: var(--text-secondary);"></i>
+                        </div>
+                        <div class="app-info">
+                            <h3 class="app-name">收藏内容已锁定</h3>
+                            <p class="app-category">需要登录</p>
+                            <p class="app-description">您的收藏列表、愿望清单和个性化推荐将在登录后显示。</p>
+                            <div class="app-footer">
+                                <div class="app-rating">
+                                    <i class="far fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                    <span>--</span>
+                                </div>
+                                <a href="login.html" class="get-btn" id="loginBtn3">登录</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 账户设置 -->
+            <div class="profile-section">
+                <h2 class="section-title">账户与设置</h2>
+                <div class="settings-list">
+                    <div class="settings-item glass" data-setting="payment">
+                        <i class="fas fa-credit-card settings-icon"></i>
+                        <div class="settings-text">
+                            <h3 class="settings-name">付款与配送</h3>
+                            <p class="settings-description">登录后管理付款方式、账单地址和购买历史</p>
+                        </div>
+                        <i class="fas fa-chevron-right settings-arrow"></i>
+                    </div>
+                    <div class="settings-item glass" data-setting="notifications">
+                        <i class="fas fa-bell settings-icon"></i>
+                        <div class="settings-text">
+                            <h3 class="settings-name">通知</h3>
+                            <p class="settings-description">登录后管理应用更新、价格下降和推荐通知</p>
+                        </div>
+                        <i class="fas fa-chevron-right settings-arrow"></i>
+                    </div>
+                    <div class="settings-item glass" data-setting="privacy">
+                        <i class="fas fa-shield-alt settings-icon"></i>
+                        <div class="settings-text">
+                            <h3 class="settings-name">隐私与安全</h3>
+                            <p class="settings-description">登录后管理您的隐私设置和账户安全</p>
+                        </div>
+                        <i class="fas fa-chevron-right settings-arrow"></i>
+                    </div>
+                    <div class="settings-item glass" data-setting="support">
+                        <i class="fas fa-headset settings-icon"></i>
+                        <div class="settings-text">
+                            <h3 class="settings-name">支持与帮助</h3>
+                            <p class="settings-description">登录后获取帮助、联系支持或提供反馈</p>
+                        </div>
+                        <i class="fas fa-chevron-right settings-arrow"></i>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 液态玻璃效果强度控制
+        const glassStrength = document.getElementById('glassStrength');
+        const glassValue = document.getElementById('glassValue');
+        
+        glassStrength.addEventListener('input', function() {
+            const value = this.value;
+            glassValue.textContent = value;
+            
+            // 更新CSS变量
+            document.documentElement.style.setProperty('--glass-blur', `${value}px`);
+        });
+
+        // 主题切换控制
+        const themeAuto = document.getElementById('themeAuto');
+        const themeLight = document.getElementById('themeLight');
+        const themeDark = document.getElementById('themeDark');
+        
+        // 检查当前系统主题
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        // 设置主题函数
+        function setTheme(theme) {
+            // 移除所有主题类
+            document.body.classList.remove('theme-light', 'theme-dark');
+            
+            // 添加所选主题类
+            if (theme === 'light') {
+                document.body.classList.add('theme-light');
+            } else if (theme === 'dark') {
+                document.body.classList.add('theme-dark');
+            }
+            // 如果是'auto'，不添加任何类，使用CSS媒体查询
+            
+            // 更新按钮状态
+            themeAuto.classList.remove('active');
+            themeLight.classList.remove('active');
+            themeDark.classList.remove('active');
+            
+            if (theme === 'auto') {
+                themeAuto.classList.add('active');
+            } else if (theme === 'light') {
+                themeLight.classList.add('active');
+            } else if (theme === 'dark') {
+                themeDark.classList.add('active');
+            }
+            
+            // 保存到localStorage
+            localStorage.setItem('appStoreTheme', theme);
+        }
+        
+        // 主题按钮事件监听
+        themeAuto.addEventListener('click', () => setTheme('auto'));
+        themeLight.addEventListener('click', () => setTheme('light'));
+        themeDark.addEventListener('click', () => setTheme('dark'));
+        
+        // 初始化主题
+        const savedTheme = localStorage.getItem('appStoreTheme') || 'auto';
+        setTheme(savedTheme);
+        
+        // 监听系统主题变化
+        prefersDarkScheme.addEventListener('change', (e) => {
+            if (localStorage.getItem('appStoreTheme') === 'auto') {
+                // 如果当前是自动模式，重新应用自动模式以响应系统变化
+                setTheme('auto');
+            }
+        });
+
+        // 响应式行为：调整大小时检查是否需要切换导航栏显示
+        function checkNavVisibility() {
+            const sideNav = document.querySelector('.side-nav');
+            const bottomNav = document.querySelector('.bottom-nav');
+            
+            if (window.innerWidth <= 1100) {
+                // 移动端视图
+                sideNav.classList.remove('active');
+            } else {
+                // 桌面端视图
+                sideNav.classList.add('active');
+            }
+        }
+        
+        // 初始检查和窗口调整监听
+        checkNavVisibility();
+        window.addEventListener('resize', checkNavVisibility);
+
+        // 应用卡片悬停效果增强
+        const appCards = document.querySelectorAll('.app-card');
+        appCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.zIndex = '10';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.zIndex = '1';
+            });
+        });
+
+        // 功能卡片点击事件
+        const featureCards = document.querySelectorAll('.feature-card');
+        featureCards.forEach(card => {
+            card.addEventListener('click', function() {
+                const feature = this.getAttribute('data-feature');
+                alert('您未登录到ReleaseBox，我们将为您跳转到登录页面');
+                // 在实际应用中，这里会跳转到登录页面
+                window.location.href = 'login.html';
+            });
+        });
+
+        // 设置项点击事件
+        const settingsItems = document.querySelectorAll('.settings-item');
+        settingsItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const setting = this.getAttribute('data-setting');
+                alert('您未登录到ReleaseBox，我们将为您跳转到登录页面');
+                // 在实际应用中，这里会跳转到登录页面
+                window.location.href = 'login.html';
+            });
+        });
+        // 初始化完成提示
+        console.log('LGOS ReleaseBox Store 我的页面已加载。\n功能说明：\n1. 用户名为"未登录"，无统计数据\n2. 登录按钮点击提示："无法连接登录服务器（ERR_LOGIN_INTERNET）"\n3. 所有需要登录的功能都会提示登录\n4. 液态玻璃效果强度可通过滑块调整\n5. 主题支持自动/浅色/深色模式\n6. 响应式布局：宽屏左侧导航，窄屏底部导航');
+    </script>
+</body>
+</html>

@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyLogin ID</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* 主色调 - 与App Store保持一致 */
+            --primary-color: #007aff;
+            --primary-dark: #0056cc;
+            --primary-light: rgba(0, 122, 255, 0.1);
+            
+            /* 表面颜色 - 亮色主题 */
+            --bg-color: #f5f5f7;
+            --surface-color: rgba(255, 255, 255, 0.9);
+            --surface-secondary: rgba(255, 255, 255, 0.7);
+            --surface-tertiary: rgba(255, 255, 255, 0.5);
+            --text-color: #1d1d1f;
+            --text-secondary: #86868b;
+            --text-disabled: #aeaeb2;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --border-light: rgba(0, 0, 0, 0.05);
+            
+            /* 功能颜色 */
+            --error-color: #ff3b30;
+            --success-color: #34c759;
+            --warning-color: #ff9500;
+            --info-color: #5ac8fa;
+            
+            /* 间距系统 */
+            --spacing-xs: 4px;
+            --spacing-s: 8px;
+            --spacing-m: 12px;
+            --spacing-l: 16px;
+            --spacing-xl: 20px;
+            --spacing-xxl: 24px;
+            --spacing-xxxl: 32px;
+            
+            /* 圆角系统 */
+            --radius-s: 8px;
+            --radius-m: 12px;
+            --radius-l: 16px;
+            --radius-xl: 20px;
+            
+            /* 阴影系统 */
+            --shadow-1: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.12);
+            --shadow-3: 0 8px 24px rgba(0, 0, 0, 0.16);
+            --shadow-4: 0 12px 32px rgba(0, 0, 0, 0.2);
+            
+            /* 动画 */
+            --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* 亚克力/Mica效果变量 */
+            --acrylic-tint-light: rgba(255, 255, 255, 0.4);
+            --acrylic-tint-dark: rgba(28, 28, 30, 0.6);
+            --acrylic-backdrop-blur: 20px;
+            --acrylic-noise-opacity: 0.02;
+        }
+
+        /* 暗色主题变量 */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #000000;
+                --surface-color: rgba(28, 28, 30, 0.8);
+                --surface-secondary: rgba(44, 44, 46, 0.8);
+                --surface-tertiary: rgba(58, 58, 60, 0.8);
+                --text-color: #f5f5f7;
+                --text-secondary: #8e8e93;
+                --text-disabled: #6c6c70;
+                --border-color: rgba(255, 255, 255, 0.1);
+                --border-light: rgba(255, 255, 255, 0.05);
+                --primary-color: #0a84ff;
+                --primary-dark: #409cff;
+                --primary-light: rgba(10, 132, 255, 0.2);
+            }
+        }
+
+        /* 手动主题切换类 */
+        .theme-light {
+            --bg-color: #f5f5f7;
+            --surface-color: rgba(255, 255, 255, 0.9);
+            --surface-secondary: rgba(255, 255, 255, 0.7);
+            --surface-tertiary: rgba(255, 255, 255, 0.5);
+            --text-color: #1d1d1f;
+            --text-secondary: #86868b;
+            --text-disabled: #aeaeb2;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --border-light: rgba(0, 0, 0, 0.05);
+            --primary-color: #007aff;
+            --primary-dark: #0056cc;
+            --primary-light: rgba(0, 122, 255, 0.1);
+        }
+
+        .theme-dark {
+            --bg-color: #000000;
+            --surface-color: rgba(28, 28, 30, 0.8);
+            --surface-secondary: rgba(44, 44, 46, 0.8);
+            --surface-tertiary: rgba(58, 58, 60, 0.8);
+            --text-color: #f5f5f7;
+            --text-secondary: #8e8e93;
+            --text-disabled: #6c6c70;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --border-light: rgba(255, 255, 255, 0.05);
+            --primary-color: #0a84ff;
+            --primary-dark: #409cff;
+            --primary-light: rgba(10, 132, 255, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color var(--transition-normal), 
+                        color var(--transition-normal), 
+                        border-color var(--transition-normal);
+        }
+
+        body {
+            font-family: -easy-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            line-height: 1.4286;
+            font-size: 14px;
+            font-weight: 400;
+            overflow-x: hidden;
+        }
+
+        /* 亚克力效果类 */
+        .acrylic {
+            position: relative;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-2);
+            overflow: hidden;
+        }
+
+        .acrylic::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            backdrop-filter: blur(var(--acrylic-backdrop-blur));
+            -webkit-backdrop-filter: blur(var(--acrylic-backdrop-blur));
+            background: linear-gradient(
+                135deg,
+                var(--surface-color) 0%,
+                var(--surface-secondary) 50%,
+                var(--surface-tertiary) 100%
+            );
+            z-index: 1;
+        }
+
+        .acrylic > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 噪点纹理效果 */
+        .acrylic::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+            opacity: var(--acrylic-noise-opacity);
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        /* 容器 */
+        .container {
+            display: flex;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            padding: var(--spacing-xxxl);
+            background-image: linear-gradient(135deg, 
+                rgba(0, 122, 255, 0.05) 0%, 
+                rgba(88, 86, 214, 0.05) 50%, 
+                rgba(255, 45, 85, 0.05) 100%
+            );
+        }
+
+        /* 左侧导航栏 - 与App Store保持一致 */
+        .side-nav {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 40px;
+            padding-left: 10px;
+        }
+
+        .logo i {
+            color: var(--primary-color);
+            margin-right: 10px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            margin-bottom: 5px;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            border-radius: 12px;
+            transition: all var(--transition-normal);
+        }
+
+        .nav-link:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+
+        .nav-link.active {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .nav-link i {
+            font-size: 20px;
+            width: 24px;
+            margin-right: 12px;
+            text-align: center;
+        }
+
+        /* 底部导航栏 - 移动端样式 */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: auto;
+            padding: 12px 20px;
+            border-radius: 24px;
+            z-index: 100;
+        }
+
+        .bottom-nav-menu {
+            display: flex;
+            list-style: none;
+        }
+
+        .bottom-nav-item {
+            margin: 0 8px;
+        }
+
+        .bottom-nav-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 12px;
+            transition: all var(--transition-normal);
+            min-width: 70px;
+        }
+
+        .bottom-nav-link:hover,
+        .bottom-nav-link.active {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+        }
+
+        .bottom-nav-link i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .bottom-nav-text {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* 登录卡片 */
+        .login-card {
+            width: 100%;
+            max-width: 440px;
+            padding: var(--spacing-xxxl);
+            border-radius: var(--radius-xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 卡片装饰 */
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), #5856d6, #ff2d55);
+            z-index: 4;
+        }
+
+        /* 登录头部 */
+        .login-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xxxl);
+        }
+
+        .login-logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto var(--spacing-l);
+            background: linear-gradient(135deg, var(--primary-color), #5856d6);
+            border-radius: var(--radius-l);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+
+        .login-title {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: var(--spacing-s);
+            color: var(--text-color);
+        }
+
+        .login-subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: var(--spacing-xs);
+            color: var(--text-color);
+        }
+
+        .form-label.required::after {
+            content: " *";
+            color: var(--error-color);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: var(--spacing-l) var(--spacing-xl);
+            font-size: 16px;
+            line-height: 1.5;
+            color: var(--text-color);
+            background-color: var(--surface-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-m);
+            transition: all var(--transition-normal);
+            outline: none;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--primary-light);
+            background-color: var(--surface-secondary);
+        }
+
+        .form-control:disabled {
+            background-color: var(--surface-tertiary);
+            color: var(--text-disabled);
+            cursor: not-allowed;
+        }
+
+        .form-control.error {
+            border-color: var(--error-color);
+        }
+
+        .form-control.error:focus {
+            box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.2);
+        }
+
+        .input-icon {
+            position: absolute;
+            right: var(--spacing-l);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .input-icon:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+
+        .form-hint {
+            font-size: 13px;
+            line-height: 1.4;
+            color: var(--text-secondary);
+            margin-top: var(--spacing-xs);
+        }
+
+        .form-hint.error {
+            color: var(--error-color);
+        }
+
+        /* 复选框 */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .checkbox {
+            position: relative;
+            width: 20px;
+            height: 20px;
+            margin-right: var(--spacing-m);
+            flex-shrink: 0;
+        }
+
+        .checkbox-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .checkbox-box {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 5px;
+            background-color: var(--surface-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-normal);
+        }
+
+        .checkbox-input:checked + .checkbox-box {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .checkbox-input:checked + .checkbox-box::after {
+            content: "";
+            width: 6px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+            margin-top: -2px;
+        }
+
+        .checkbox-input:focus + .checkbox-box {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 1px;
+        }
+
+        .checkbox-label {
+            font-size: 15px;
+            line-height: 1.5;
+            color: var(--text-color);
+            cursor: pointer;
+        }
+
+        /* 按钮 */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.5;
+            padding: var(--spacing-l) var(--spacing-xxl);
+            border-radius: var(--radius-m);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            text-decoration: none;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .btn:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            background-color: var(--surface-tertiary);
+            color: var(--text-disabled);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background-color: var(--surface-tertiary);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--surface-secondary);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary:active {
+            transform: translateY(0);
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .btn-loading {
+            position: relative;
+            color: transparent;
+        }
+
+        .btn-loading::after {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        .btn-primary.btn-loading::after {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+        }
+
+        .btn-secondary.btn-loading::after {
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-top-color: var(--text-color);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 链接 */
+        .link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 15px;
+            line-height: 1.5;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: all var(--transition-fast);
+        }
+
+        .link:hover {
+            text-decoration: underline;
+            opacity: 0.9;
+        }
+
+        .link:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+            border-radius: 2px;
+        }
+
+        /* 分隔线 */
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: var(--spacing-xl) 0;
+        }
+
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background-color: var(--border-light);
+        }
+
+        .divider-text {
+            padding: 0 var(--spacing-l);
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        /* 消息提示 */
+        .message {
+            padding: var(--spacing-l);
+            border-radius: var(--radius-m);
+            margin-bottom: var(--spacing-xl);
+            font-size: 15px;
+            line-height: 1.5;
+            display: flex;
+            align-items: flex-start;
+            border-left: 4px solid transparent;
+        }
+
+        .message-icon {
+            margin-right: var(--spacing-m);
+            flex-shrink: 0;
+            font-size: 18px;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-title {
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .message.error {
+            background-color: rgba(255, 59, 48, 0.1);
+            border-left-color: var(--error-color);
+            color: var(--error-color);
+        }
+
+        .message.success {
+            background-color: rgba(52, 199, 89, 0.1);
+            border-left-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .message.warning {
+            background-color: rgba(255, 149, 0, 0.1);
+            border-left-color: var(--warning-color);
+            color: var(--warning-color);
+        }
+
+        .message.info {
+            background-color: rgba(90, 200, 250, 0.1);
+            border-left-color: var(--info-color);
+            color: var(--info-color);
+        }
+
+        /* 底部链接 */
+        .login-footer {
+            margin-top: var(--spacing-xxl);
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-xl);
+            margin-top: var(--spacing-l);
+        }
+
+        /* 设置面板 */
+        .settings-panel {
+            position: fixed;
+            right: 30px;
+            top: 30px;
+            width: 300px;
+            padding: 25px;
+            border-radius: var(--radius-xl);
+            z-index: 90;
+        }
+
+        .settings-title {
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .settings-title i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        .setting-item {
+            margin-bottom: 20px;
+        }
+
+        .setting-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .theme-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .theme-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--surface-tertiary);
+            color: var(--text-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all var(--transition-normal);
+        }
+
+        .theme-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .theme-btn:hover:not(.active) {
+            background-color: var(--surface-secondary);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1100px) {
+            .container {
+                padding: 20px;
+                padding-bottom: 100px;
+            }
+            
+            .side-nav {
+                transform: translateX(-100%);
+                transition: transform var(--transition-normal);
+            }
+            
+            .bottom-nav {
+                display: block;
+            }
+            
+            .settings-panel {
+                position: relative;
+                right: auto;
+                top: auto;
+                width: 100%;
+                margin-bottom: 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: var(--spacing-l);
+            }
+            
+            .login-card {
+                padding: var(--spacing-xxl) var(--spacing-xl);
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: var(--spacing-m);
+            }
+            
+            .bottom-nav {
+                width: calc(100% - 40px);
+            }
+            
+            .bottom-nav-link {
+                min-width: auto;
+                padding: 8px 12px;
+            }
+        }
+
+        /* 辅助类 */
+        .text-center {
+            text-align: center;
+        }
+        
+        .mb-0 {
+            margin-bottom: 0;
+        }
+        
+        .mt-0 {
+            margin-top: 0;
+        }
+        
+        .mt-s {
+            margin-top: var(--spacing-s);
+        }
+        
+        .mt-m {
+            margin-top: var(--spacing-m);
+        }
+        
+        .mt-l {
+            margin-top: var(--spacing-l);
+        }
+        
+        .mt-xl {
+            margin-top: var(--spacing-xl);
+        }
+        
+        .mt-xxl {
+            margin-top: var(--spacing-xxl);
+        }
+        
+        .mb-s {
+            margin-bottom: var(--spacing-s);
+        }
+        
+        .mb-m {
+            margin-bottom: var(--spacing-m);
+        }
+        
+        .mb-l {
+            margin-bottom: var(--spacing-l);
+        }
+        
+        .mb-xl {
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .mb-xxl {
+            margin-bottom: var(--spacing-xxl);
+        }
+    </style>
+</head>
+<body>
+    <!-- 左侧导航栏 (桌面端) -->
+    <nav class="side-nav acrylic">
+        <div class="logo">
+            <i class="fa-brands fa-app-store"></i>
+            <span>ReleaseBox Store</span>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="appstore_homepage.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>首页</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="appstore_discover.html" class="nav-link">
+                    <i class="fas fa-compass"></i>
+                    <span>发现</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="appstore_myprofile.html" class="nav-link">
+                    <i class="fas fa-user"></i>
+                    <span>我的</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- 底部导航栏 (移动端) -->
+    <nav class="bottom-nav acrylic">
+        <ul class="bottom-nav-menu">
+            <li class="bottom-nav-item">
+                <a href="appstore_homepage.html" class="bottom-nav-link">
+                    <i class="fas fa-home"></i>
+                    <span class="bottom-nav-text">首页</span>
+                </a>
+            </li>
+            <li class="bottom-nav-item">
+                <a href="appstore_discover.html" class="bottom-nav-link">
+                    <i class="fas fa-compass"></i>
+                    <span class="bottom-nav-text">发现</span>
+                </a>
+            </li>
+            <li class="bottom-nav-item">
+                <a href="appstore_myprofile.html" class="bottom-nav-link">
+                    <i class="fas fa-user"></i>
+                    <span class="bottom-nav-text">我的</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- 设置面板 -->
+    <div class="settings-panel acrylic">
+        <h3 class="settings-title">
+            <i class="fas fa-sliders-h"></i> 界面设置
+        </h3>
+        
+        <div class="setting-item">
+            <label class="setting-label">主题模式</label>
+            <div class="theme-buttons">
+                <button class="theme-btn active" id="themeAuto">自动</button>
+                <button class="theme-btn" id="themeLight">浅色</button>
+                <button class="theme-btn" id="themeDark">深色</button>
+            </div>
+        </div>
+        
+        <div class="setting-item">
+            <p style="font-size: 13px; color: var(--text-secondary); margin-top: 10px;">
+                <i class="fas fa-info-circle"></i> 支持深色/浅色主题
+            </p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="login-card acrylic">
+            <!-- 登录头部 -->
+            <div class="login-header">
+                <div class="login-logo">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h1 class="login-title">登录 ReleaseBox Store</h1>
+                <p class="login-subtitle">登录以访问您的应用、订阅和收藏内容</p>
+            </div>
+
+            <!-- 错误消息 -->
+            <div class="message error" id="errorMessage" style="display: none;">
+                <i class="fas fa-exclamation-circle message-icon"></i>
+                <div class="message-content">
+                    <div class="message-title">登录失败</div>
+                    <div>用户名或密码不正确，请重试</div>
+                </div>
+            </div>
+
+            <!-- 成功消息 -->
+            <div class="message success" id="successMessage" style="display: none;">
+                <i class="fas fa-check-circle message-icon"></i>
+                <div class="message-content">
+                    <div class="message-title">登录成功</div>
+                    <div>正在重定向到 ReleaseBox Store...</div>
+                </div>
+            </div>
+
+            <!-- 登录表单 -->
+            <form id="loginForm">
+                <div class="form-group">
+                    <label class="form-label required" for="email">EasyLogin ID 或电子邮件</label>
+                    <div class="input-wrapper">
+                        <input type="email" id="email" class="form-control" placeholder="name@example.com" required>
+                    </div>
+                    <div class="form-hint" id="emailHint">请输入您的 EasyLogin ID 或电子邮件地址</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label required" for="password">密码</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" class="form-control" placeholder="输入密码" required>
+                        <button type="button" class="input-icon" id="togglePassword" aria-label="显示密码">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="form-hint" id="passwordHint">密码至少8个字符，包含字母和数字</div>
+                </div>
+
+                <div class="checkbox-group">
+                    <label class="checkbox">
+                        <input type="checkbox" class="checkbox-input" id="rememberMe">
+                        <span class="checkbox-box"></span>
+                    </label>
+                    <span class="checkbox-label" for="rememberMe">在此设备上保持登录状态</span>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block" id="loginButton">
+                    登录
+                </button>
+            </form>
+
+            <!-- 分隔线 -->
+            <div class="divider">
+                <div class="divider-line"></div>
+                <div class="divider-text">或</div>
+                <div class="divider-line"></div>
+            </div>
+
+            <!-- 其他登录方式 -->
+            <div class="text-center mb-l">
+                <button class="btn btn-secondary btn-block" id="easyLogin">
+                    <i class="fa-brands fa-microsoft"></i> 使用 Microsoft 登录
+                </button>
+            </div>
+
+            <!-- 底部链接 -->
+            <div class="login-footer">
+                <a href="#" class="link" id="forgotPassword">忘记了 EasyLogin ID 或密码？</a>
+                <div class="footer-links">
+                    <a href="appstore_myprofile.html" class="link" id="backToStore">返回 ReleaseBox Store</a>
+                    <a href="#" class="link" id="createAccount">创建新的 EasyLogin ID</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM 元素
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const togglePassword = document.getElementById('togglePassword');
+        const loginButton = document.getElementById('loginButton');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const emailHint = document.getElementById('emailHint');
+        const passwordHint = document.getElementById('passwordHint');
+        const themeAuto = document.getElementById('themeAuto');
+        const themeLight = document.getElementById('themeLight');
+        const themeDark = document.getElementById('themeDark');
+        const easyLogin = document.getElementById('easyLogin');
+        const forgotPassword = document.getElementById('forgotPassword');
+        const createAccount = document.getElementById('createAccount');
+        const backToStore = document.getElementById('backToStore');
+        const rememberMe = document.getElementById('rememberMe');
+
+        // 主题切换控制
+        function setTheme(theme) {
+            // 移除所有主题类
+            document.body.classList.remove('theme-light', 'theme-dark');
+            
+            // 添加所选主题类
+            if (theme === 'light') {
+                document.body.classList.add('theme-light');
+            } else if (theme === 'dark') {
+                document.body.classList.add('theme-dark');
+            }
+            // 如果是'auto'，不添加任何类，使用CSS媒体查询
+            
+            // 更新按钮状态
+            themeAuto.classList.remove('active');
+            themeLight.classList.remove('active');
+            themeDark.classList.remove('active');
+            
+            if (theme === 'auto') {
+                themeAuto.classList.add('active');
+            } else if (theme === 'light') {
+                themeLight.classList.add('active');
+            } else if (theme === 'dark') {
+                themeDark.classList.add('active');
+            }
+            
+            // 保存到localStorage
+            localStorage.setItem('appStoreTheme', theme);
+        }
+        
+        // 主题按钮事件监听
+        themeAuto.addEventListener('click', () => setTheme('auto'));
+        themeLight.addEventListener('click', () => setTheme('light'));
+        themeDark.addEventListener('click', () => setTheme('dark'));
+        
+        // 初始化主题
+        const savedTheme = localStorage.getItem('appStoreTheme') || 'auto';
+        setTheme(savedTheme);
+        
+        // 检查当前系统主题
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        // 监听系统主题变化
+        prefersDarkScheme.addEventListener('change', (e) => {
+            if (localStorage.getItem('appStoreTheme') === 'auto') {
+                // 如果当前是自动模式，重新应用自动模式以响应系统变化
+                setTheme('auto');
+            }
+        });
+
+        // 密码显示/隐藏
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.innerHTML = type === 'password' 
+                ? '<i class="fas fa-eye"></i>' 
+                : '<i class="fas fa-eye-slash"></i>';
+        });
+
+        // 表单验证
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function validatePassword(password) {
+            return password.length >= 8;
+        }
+
+        // 输入验证实时反馈
+        emailInput.addEventListener('input', function() {
+            const email = this.value.trim();
+            
+            if (email === '') {
+                emailInput.classList.remove('error');
+                emailHint.textContent = '请输入您的 EasyLogin ID 或电子邮件地址';
+                emailHint.classList.remove('error');
+            } else if (!validateEmail(email)) {
+                emailInput.classList.add('error');
+                emailHint.textContent = '请输入有效的电子邮件地址';
+                emailHint.classList.add('error');
+            } else {
+                emailInput.classList.remove('error');
+                emailHint.textContent = '电子邮件格式正确';
+                emailHint.classList.remove('error');
+            }
+        });
+
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            
+            if (password === '') {
+                passwordInput.classList.remove('error');
+                passwordHint.textContent = '密码至少8个字符，包含字母和数字';
+                passwordHint.classList.remove('error');
+            } else if (!validatePassword(password)) {
+                passwordInput.classList.add('error');
+                passwordHint.textContent = '密码至少需要8个字符';
+                passwordHint.classList.add('error');
+            } else {
+                passwordInput.classList.remove('error');
+                passwordHint.textContent = '密码强度：中等';
+                passwordHint.classList.remove('error');
+            }
+        });
+
+        // 表单提交
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            
+            // 验证表单
+            let isValid = true;
+            
+            if (!email || !validateEmail(email)) {
+                emailInput.classList.add('error');
+                emailHint.textContent = '请输入有效的电子邮件地址';
+                emailHint.classList.add('error');
+                isValid = false;
+            }
+            
+            if (!password || !validatePassword(password)) {
+                passwordInput.classList.add('error');
+                passwordHint.textContent = '密码至少需要8个字符';
+                passwordHint.classList.add('error');
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                showMessage('error', '请检查表单中的错误');
+                return;
+            }
+            
+            // 显示加载状态
+            loginButton.classList.add('btn-loading');
+            loginButton.disabled = true;
+            
+            // 模拟API请求
+            try {
+                // 这里模拟网络请求延迟
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // 测试账户
+                if (false) { // 这里可以替换为实际的API验证逻辑
+                    showMessage('success', '登录成功！正在重定向到 App Store...');
+                    
+                    // 在实际应用中，这里会重定向到App Store首页
+                    setTimeout(() => {
+                        alert('登录成功！在实际应用中，这里会重定向到 App Store 首页。\n\n测试账户: test@example.com\n密码: password123');
+                        resetForm();
+                    }, 2000);
+                } else {
+                    throw new Error('用户名或密码不正确');
+                }
+            } catch (error) {
+                showMessage('error', error.message || '登录失败，请重试');
+            } finally {
+                // 重置按钮状态
+                loginButton.classList.remove('btn-loading');
+                loginButton.disabled = false;
+            }
+        });
+
+        // 显示消息
+        function showMessage(type, text) {
+            // 隐藏所有消息
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            // 显示指定消息
+            if (type === 'error') {
+                errorMessage.querySelector('.message-content div:last-child').textContent = text;
+                errorMessage.style.display = 'flex';
+            } else if (type === 'success') {
+                successMessage.querySelector('.message-content div:last-child').textContent = text;
+                successMessage.style.display = 'flex';
+            }
+        }
+
+        // 重置表单
+        function resetForm() {
+            loginForm.reset();
+            emailInput.classList.remove('error');
+            passwordInput.classList.remove('error');
+            emailHint.textContent = '请输入您的 EasyLogin ID 或电子邮件地址';
+            passwordHint.textContent = '密码至少8个字符，包含字母和数字';
+            emailHint.classList.remove('error');
+            passwordHint.classList.remove('error');
+        }
+
+        // EasyLogin 登录
+        easyLogin.addEventListener('click', function() {
+            showMessage('info', '正在重定向到 EasyLogin 登录页面...');
+            // 在实际应用中，这里会重定向到 EasyLogin OAuth
+        });
+
+        // 忘记密码
+        forgotPassword.addEventListener('click', function(e) {
+            e.preventDefault();
+            showMessage('info', '密码重置链接已发送到您的邮箱');
+        });
+
+        // 创建账户
+        createAccount.addEventListener('click', function(e) {
+            e.preventDefault();
+            showMessage('info', '重定向到 EasyLogin ID 创建页面');
+        });
+
+        // 返回 App Store
+        backToStore.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = 'appstore_myprofile.html';
+        });
+
+        // 页面加载时检查已保存的登录信息
+        window.addEventListener('load', function() {
+            const savedEmail = localStorage.getItem('savedEmail');
+            const savedRemember = localStorage.getItem('savedRemember') === 'true';
+            
+            if (savedEmail && savedRemember) {
+                emailInput.value = savedEmail;
+                rememberMe.checked = true;
+            }
+        });
+
+        // 记住我功能
+        rememberMe.addEventListener('change', function() {
+            if (this.checked && emailInput.value.trim()) {
+                localStorage.setItem('savedEmail', emailInput.value.trim());
+                localStorage.setItem('savedRemember', 'true');
+            } else {
+                localStorage.removeItem('savedEmail');
+                localStorage.removeItem('savedRemember');
+            }
+        });
+
+        // 响应式导航栏控制
+        function checkNavVisibility() {
+            const sideNav = document.querySelector('.side-nav');
+            const bottomNav = document.querySelector('.bottom-nav');
+            
+            if (window.innerWidth <= 1100) {
+                // 移动端视图
+                sideNav.classList.remove('active');
+            } else {
+                // 桌面端视图
+                sideNav.classList.add('active');
+            }
+        }
+        
+        // 初始检查和窗口调整监听
+        checkNavVisibility();
+        window.addEventListener('resize', checkNavVisibility);
+
+        // 初始化完成提示
+        console.log('登录界面已加载。\n功能说明：\n1. 使用 Fluent UI 2.0 设计语言，带有亚克力/Mica 效果\n2. 与 App Store 页面保持一致的视觉设计\n3. 完整的表单验证和实时反馈\n4. 深色/浅色主题切换，支持自动模式\n5. 响应式设计，适配桌面端和移动端\n6. 测试账户: test@example.com / password123');
+    </script>
+</body>
+</html>
